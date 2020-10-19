@@ -130,7 +130,7 @@ def draw_steward_hist(input_boro, input_specy):
     tree_long.health = pd.Categorical(tree_long.health, categories=["Poor", "Fair", "Good"],ordered=True)
     tree_long = tree_long.sort_values(['steward','health'], axis=0)
     # draw graph
-    fig = px.bar(tree_long, x="steward", y='proportion', color='health', barmode="group")
+    fig = px.bar(tree_long, x="steward", y='proportion', color='health', barmode="group", name="Steward impact on tree health")
     return fig
     
 # run
