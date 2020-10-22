@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <title>Data 608 Module 5</title>
+      <h1>Data 608 Module 5</h1>
+      <h2>Amit Kapoor</h1>
+      <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+      
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.4/d3.min.js"></script>
+  		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  		
+      <script type="text/javascript">
 
+      // load all data from csv
+      function loadPresidentData(){
+      	t = d3.csv("https://raw.githubusercontent.com/amit-kapoor/data608/master/module5/presidents.csv",function(data) {
+      	var columns = ['Name','Height','Weight'];
+          var table = d3.select('#loadData').append('table')
+          var thead = table.append('thead')
+          var tbody = table.append('tbody')
+          thead.append('tr').selectAll('th').data(columns).enter().append('th').text(function (d) { return d })
+          var rows = tbody.selectAll('tr').data(data).enter().append('tr')
+          var cells = rows.selectAll('td').data(function(row) {
+            return columns.map(function (column) {
+              return { column: column, value: row[column] } })
+          }).enter().append('td').text(function (d) { return d.value })
+          return table;
+        });
+      }
+
+      // search president data based on input
+      function searchPresData(){
+        clear()
+        var pres = document.getElementById('presName').value
+        var t = d3.csv('https://raw.githubusercontent.com/amit-kapoor/data608/master/module5/presidents.csv',function (data) {
+          var columns = ['Name','Height','Weight'];
+        var subset = data.filter( function(d){ return String(d.Name) == pres });  
+          findPresident(subset,columns) });
+      }
+
+      function findPresident(data,columns) {
+        var table = d3.select('#aPresData').append('table')
+        var thead = table.append('thead')
+        var tbody = table.append('tbody')
+        thead.append('tr').selectAll('th').data(columns).enter().append('th').text(function (d) { return d })
+        var rows = tbody.selectAll('tr').data(data).enter().append('tr')
+        var cells = rows.selectAll('td').data(function(row) {
+          return columns.map(function (column) {
+            return { column: column, value: row[column] } })
+        }).enter().append('td').text(function (d) { return d.value })
+        return table;
+      }
+
+      function clear() {
+        document.getElementById('aPresData').innerHTML = ""; 
+      }
+
+      
+      </script>
+    </head>
+
+    <body onload="loadPresidentData()">
+        <p><b>Write a function to load the presidents.csv data and display the data as an html table</b></p><br>
+        <div id="loadData"></div>
+        <br>
+        <p><b>Write a function that will return that president's height & weight when you type it in</b></p><br>
+		    <input id="presName" type="text" size="20">
+        <input type="button" value="Search" onclick="searchPresData()"><br>
+		    <div id="aPresData"></div>
+    </body>
+</html>
