@@ -1,11 +1,6 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+# title: "Data 608 - Final Project"
+# author: "Amit Kapoor"
+# date: "12/01/2020"
 
 # load necessary libraries
 library(shiny)
@@ -26,6 +21,7 @@ airlines_url <- getURL('https://raw.githubusercontent.com/amit-kapoor/data608/ma
 airports_url <- getURL('https://raw.githubusercontent.com/amit-kapoor/data608/master/FinalProject/airports.csv')
 routes_url <- getURL('https://raw.githubusercontent.com/amit-kapoor/data608/master/FinalProject/routes.csv')
 
+# read csv
 airlines <- read_csv(airlines_url)
 airports <- read_csv(airports_url)
 routes <- read_csv(routes_url)
@@ -50,6 +46,12 @@ world_map <- ggplot() +
   geom_map(data = countries_map, 
            map = countries_map,aes(x = long, y = lat, map_id = region, group = group),
            fill = "white", color = "black", size = 0.2)
+
+# To find routes from a given airport, we first create a function routes_through as below:
+  ## create a dataframe filtering the given airport - d1
+  ## get all the destination airports
+  ## merge it with the airports.csv data - d2
+  ## cbind d1 and d2
 
 routes_through <- function(iata_start){
   
@@ -83,6 +85,10 @@ routes_through <- function(iata_start){
 
 
 # **** Busiest ******  
+# This function accepts number of aircrafts and returns a dataframe with relevant details. 
+# In this function first we subset data for given airline, loop over and get log and lat. 
+# We will then get routes of these 4 types and finall draw on map
+
 airlineConnect <- function(routes, name){
   
   arpt_src<-c()
@@ -116,26 +122,25 @@ airlineConnect <- function(routes, name){
 
 routes$num_aircraft <- sapply(routes$Equipment, function(x) length(strsplit(x," ")[[1]]))
 
-#routes_5_aircrafts <- routes %>% dplyr::filter(num_aircraft==5)
 routes_6_aircrafts <- routes %>% dplyr::filter(num_aircraft==6)
 routes_7_aircrafts <- routes %>% dplyr::filter(num_aircraft==7)
 routes_8_aircrafts <- routes %>% dplyr::filter(num_aircraft==8)
 routes_9_aircrafts <- routes %>% dplyr::filter(num_aircraft==9)
 
-#routes_5 <- airlineConnect(routes_5_aircrafts, 'For 5')
 routes_6 <- airlineConnect(routes_6_aircrafts, 'routes having 6 aircrafts')
 routes_7 <- airlineConnect(routes_7_aircrafts, 'routes having 7 aircrafts')
 routes_8 <- airlineConnect(routes_8_aircrafts, 'routes having 8 aircrafts')
 routes_9 <- airlineConnect(routes_9_aircrafts, 'routes having 9 aircrafts')
 
 tot_routes <- rbind(routes_6, routes_7, routes_8, routes_9)
-# **** Busiest ****** 
+
 
 
 # For Airports dropdown
 airport_dd <- airports %>% select(Name, IATA, Country) %>% filter(IATA != '\\N') %>% unique
 # remove special characters from dataframe
 airport_dd <- data.frame(sapply(airport_dd, function(x) gsub("[^\x20-\x7E]", "", x)), stringsAsFactors=FALSE)
+# mutate label as IATA - Airport name
 airport_dd <- mutate(airport_dd, iata_name = paste(IATA, "-" , Name)) 
 
 
@@ -161,6 +166,8 @@ routes<-data.frame(merge(routes, airlines %>% select(IATA, Name), by='IATA',sort
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+  
+  # for showing notification
   tags$head(
     tags$style(
       HTML(".shiny-notification {
@@ -170,22 +177,20 @@ ui <- fluidPage(
              }
              "
       )
-    )
+    ),
+    tags$div(class="title", titlePanel("Data 608 Final Project - OpenFlights"), align="center")
   ),
-
-  # App title ----
-  titlePanel("Data 608 - Final Project"),
-  
+  # spinner during page load
   add_busy_spinner(spin = "fading-circle", position = c("bottom-left")),
-  
+  br(),
+  # show country, airport and airlines drop down
   fluidRow(
     column(3, selectInput('cntry', 'Countries:', sort(unique(airports$Country)), selected='United States' )),
     column(4, uiOutput("airprt")),
     column(4, selectInput('airline', 'Airlines:', choices = my_choices, selected='American Airlines'))
   ), 
-  
   hr(),
-  
+  # tabs for various visualization
   tabsetPanel(type = "tabs",
               tabPanel("Most Airports", plotOutput("mostairp", height=700)),
               tabPanel("Most Airlines", plotOutput("mostairl", height=700)),
@@ -199,10 +204,11 @@ ui <- fluidPage(
 # Define server logic for random distribution app ----
 server <- function(input, output) {
   
-  output$sel_cntry <- renderText({
-    input$cntry
-  })
+#  output$sel_cntry <- renderText({
+#    input$cntry
+#  })
   
+  # render airport based on country selected
   output$airprt <- renderUI({
     airport_dd <- airport_dd %>% filter(Country == input$cntry)
     ap_choices <- as.list(airport_dd$IATA)
@@ -210,6 +216,7 @@ server <- function(input, output) {
     selectInput('airprt', 'Airports:', choices = ap_choices, selected='JFK', width="500px")
   })
   
+  # Countries having most airports
   output$mostairp <- renderPlot({
     data.frame(table(airports$Country)) %>% 
       arrange(desc(Freq)) %>% 
@@ -218,20 +225,19 @@ server <- function(input, output) {
       geom_bar(stat = "identity", show.legend = F) +
       labs(title = "Top 25 Countries having most Airports", 
            x = "Country", y = "The number of Airports") +
-      #geom_label(angle = 45, show.legend = F) +
       geom_text(show.legend = F, vjust = -.5) + 
       scale_fill_viridis_d(option = "cividis") +
       theme_fivethirtyeight() +
       theme(axis.text.x = element_text(angle = 40, size = 15), panel.grid.major = element_blank(), panel.grid.minor = element_blank())
   })
   
+  # Countries running most airports
   output$mostairl <- renderPlot({
     data.frame(table(airlines$Country)) %>% 
       arrange(desc(Freq)) %>% head(25) %>% 
       ggplot(aes(x = reorder(Var1, -Freq), y = Freq, 
                  fill = Var1, label = Freq)) + 
       geom_bar(stat = "identity", show.legend = F) +
-      #geom_label(show.legend = F, vjust = -.1) + 
       geom_text(show.legend = F, vjust = -.5) + 
       scale_fill_viridis_d(option = "cividis") +  #plasma, magma, inferno, cividis
       theme_fivethirtyeight() +
@@ -240,7 +246,7 @@ server <- function(input, output) {
            title = "Top 25 Countries having most airlines")
   })
   
-  
+  # Airports routes
   output$route <- renderPlot({
     
     arp_origin <- routes_through(input$airprt)
@@ -280,7 +286,7 @@ server <- function(input, output) {
     
   })
   
-  
+  # Busiest routes
   output$busiest <- renderPlot({
     world_map + 
       geom_curve(data=tot_routes,aes(x=arpt_src_long,
@@ -304,7 +310,7 @@ server <- function(input, output) {
     
   })
   
-  
+  # Airline Routes
   output$alroute <- renderPlot({
     
     al_noncs <- routes %>% dplyr::filter(Name==input$airline) %>% dplyr::filter(is.na(Codeshare))
@@ -359,7 +365,6 @@ server <- function(input, output) {
         color = "green4",
         alpha=.5,size=.25) + 
         theme_fivethirtyeight() +
-        #theme_classic() +
         theme(legend.position=c(.85,1.04),
               panel.grid.major = element_blank(),
               axis.text=element_blank(),

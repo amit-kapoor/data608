@@ -1,5 +1,5 @@
 ---
-title: "Data605 - Final Project"
+title: "Data 608 - Final Project"
 author: "Amit Kapoor"
 date: "12/01/2020"
 output:
@@ -13,6 +13,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# OpenFlights
 
 ## Introduction
 Airlines industry has been a major mode of transportation within any country or across the countries around the globe now. Though it involves its strict guidelines for airport operations, flights, their routes and all, every other country is now substantially looking to invest in this industry to attract visitors and businesses from around the globe to boost their economy. It also plays a significant role to reflect better infrastructure. There are thousands of airlines operating across the globe connecting thousands of airports with different routes and I am always curious to enquire about airlines routes, connecting airports and much more related insights
@@ -37,6 +39,7 @@ library(patchwork)
 library(janitor)
 library(treemap)
 library(ggiraph)
+library(plotly)
 ```
 
 ## Data
@@ -160,6 +163,7 @@ treemap(data.frame(table(airports$Country)),
         index="Var1",
         vSize="Freq",
         type="index",
+        palette = 'Pastel1', #Set3, Set2, Pastel1, 
         title = "Overall Number of Airport by countries")
 ```
 
@@ -188,6 +192,16 @@ data.frame(table(airlines$Country)) %>%
 
 ```
 
+```{r}
+treemap(data.frame(table(airlines$Country)),
+        index="Var1",
+        vSize="Freq",
+        type="index",
+        palette = 'Pastel1', #Set3, Set2, Pastel1, 
+        algorithm = 'pivotSize', 
+        title = "Overall Number of Airport by countries")
+
+```
 
 Again as expected US is on top having most airlines. Dont see India here though it was earlier in top 25 countries of airports.
 
@@ -361,7 +375,7 @@ world_map +
       theme_fivethirtyeight() + 
       theme(
         legend.position="bottom",
-        legend.text = element_text(colour="black", size=15, color = "orangered4"), 
+        legend.text = element_text(colour="black", size=9, color = "orangered4"), 
         panel.grid.major = element_blank(),
         axis.text=element_blank(),
         axis.ticks=element_blank(),plot.title=element_text(face="bold",hjust=0,vjust=.75,colour="#3C3C3C",size=19),
@@ -446,11 +460,9 @@ w1+w2
 ```
 
 
+## Summary
 
+As we can clearly gain insights from the above graphs for most busiest airports, top countries having most airports and running most airlines. United States has by far the most airports most probably due to highest connectivity within and around the world. Interesting to see Brazil and Russia has same number of airports as they significantly differ in total area. India has also made it within top 10 countries. Number of airports in any given country depends upon the its economy and connectivity. Again as expected US is on top having most airlines. Dont see India here though it was earlier in top 25 countries of airports. For busiest routes, it seems mainly in United States and Europe. Also seeing few airline routes,  US (American Airlines, Delta) and Europe (Lufthansa) airlines are having connectivity across the globe.
 
-
-
-
-
-
+There can be further ways to expand this Data Exploration with extended airports data that includes airports, train stations and ferry terminals, including user contributions.
 
