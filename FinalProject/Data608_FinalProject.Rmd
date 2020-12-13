@@ -49,6 +49,14 @@ I will use the data from OpenFlights (https://openflights.org/data.html), an onl
 * airports.csv
 * routes.csv
 
+```{r git-url, eval=TRUE, warning=FALSE}
+# get data
+airlines_url <- getURL('https://raw.githubusercontent.com/amit-kapoor/data608/master/FinalProject/airlines.csv')
+airports_url <- getURL('https://raw.githubusercontent.com/amit-kapoor/data608/master/FinalProject/airports.csv')
+routes_url <- getURL('https://raw.githubusercontent.com/amit-kapoor/data608/master/FinalProject/routes.csv')
+```
+
+
 ### airlines data columns
 
 * Airline ID - Unique OpenFlights identifier for this airline.
@@ -62,7 +70,7 @@ I will use the data from OpenFlights (https://openflights.org/data.html), an onl
 
 
 ```{r read-airlines, eval=TRUE, warning=FALSE}
-airlines <- read_csv("airlines.csv")
+airlines <- read_csv(airlines_url)
 head(airlines)
 ```
 
@@ -85,7 +93,7 @@ head(airlines)
 * Source - Source of this data. "OurAirports" for data sourced from OurAirports, "Legacy" for old data not matched to OurAirports (mostly DAFIF), "User" for unverified user contributions. In airports.csv, only source=OurAirports is included.
 
 ```{r read-airports, eval=TRUE, warning=FALSE}
-airports <- read_csv("airports.csv")
+airports <- read_csv(airports_url)
 head(airports)
 ```
 
@@ -104,7 +112,7 @@ head(airports)
 
 
 ```{r read-routes, eval=TRUE, warning=FALSE}
-routes <- read_csv("routes.csv")
+routes <- read_csv(routes_url)
 head(routes)
 ```
 
